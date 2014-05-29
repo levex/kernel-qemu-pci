@@ -16,7 +16,33 @@ static const struct pci_device_id pcidevtbl[] = {
 };
 
 static int levpci_probe(struct pci_dev *pdev, const struct pci_device_id *ent) {
-	printk("lev: probed pci dev!\n");
+
+	void __iomem *mmio;
+	char *buf;
+	int len, i;
+
+	printk("lev: probed pci dev, trying read.\n");
+
+	mmio = pci_iomap(pdev, 0, 0);
+	if (!mmio) {
+		printk(KERN_EMERG "lev: failed to iomap!\n");
+		return -ENODEV;
+	}
+
+	len = ioread8(mmio + 1);
+	printk("lev: length of string: %d bytes\n", len);
+
+	buf = kmalloc(len + 1, GFP_KERNEL);
+	if (!buf) {
+		printk("lev: no memory...\n");
+		return -ENOMEM;
+	}
+
+	for (i = 0; i < len; i++)
+		buf[i] = ioread8(mmio);
+
+	printk("lev: read this string: %s", buf);
+
 	return 0;
 }
 

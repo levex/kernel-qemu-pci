@@ -26,6 +26,8 @@ typedef struct PCILevDevState {
     PCIDevice parent_obj;
     /*< public >*/
 
+    int pos;
+
     MemoryRegion mmio;
     MemoryRegion portio;
 } PCILevDevState;
@@ -35,53 +37,38 @@ typedef struct PCILevDevState {
 #define PCI_LEV_DEV(obj) \
     OBJECT_CHECK(PCILevDevState, (obj), TYPE_PCI_LEV_DEV)
 
-static void
-pci_levdev_write(void *opaque, hwaddr addr, uint64_t val,
-                  unsigned size, int type)
-{
-    //PCILevDevState *d = opaque;
-
-    /* TODO */
-
-}
-
 static uint64_t
 pci_levdev_read(void *opaque, hwaddr addr, unsigned size)
 {
-    //PCILevDevState *d = opaque;
+    PCILevDevState *d = opaque;
+    static const char *str = "Hello, world!\n";
+    static int len = 0;
     
-    /* TODO */
-    
-    return 0;
+    len = strlen(str);
+
+    //printf("addr = 0x%x\n", (unsigned int)addr);
+
+    if (addr == 0)
+        return str[d->pos ++];
+    else
+        return len;
 }
 
 static void
 pci_levdev_mmio_write(void *opaque, hwaddr addr, uint64_t val,
                        unsigned size)
 {
-    pci_levdev_write(opaque, addr, val, size, 0);
-}
 
-static void
-pci_levdev_pio_write(void *opaque, hwaddr addr, uint64_t val,
-                       unsigned size)
-{
-    pci_levdev_write(opaque, addr, val, size, 1);
+   //PCILevDevState *d = opaque;
+
+   printf("lev: got write of size %d val: 0x%x\n", size, (unsigned int)val);
+
+   return;
 }
 
 static const MemoryRegionOps pci_levdev_mmio_ops = {
     .read = pci_levdev_read,
     .write = pci_levdev_mmio_write,
-    .endianness = DEVICE_LITTLE_ENDIAN,
-    .impl = {
-        .min_access_size = 1,
-        .max_access_size = 1,
-    },
-};
-
-static const MemoryRegionOps pci_levdev_pio_ops = {
-    .read = pci_levdev_read,
-    .write = pci_levdev_pio_write,
     .endianness = DEVICE_LITTLE_ENDIAN,
     .impl = {
         .min_access_size = 1,
@@ -98,11 +85,11 @@ static int pci_levdev_init(PCIDevice *pci_dev)
 
     pci_conf[PCI_INTERRUPT_PIN] = 0; /* no interrupt pin */
 
-    memory_region_init_io(&d->portio, OBJECT(d), &pci_levdev_pio_ops, d,
-                          "pci-levdev-portio", 128);
+    memory_region_init_io(&d->mmio, OBJECT(d), &pci_levdev_mmio_ops, d,
+                          "pci-levdev-mmio", 128);
     pci_register_bar(pci_dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &d->mmio);
-    pci_register_bar(pci_dev, 1, PCI_BASE_ADDRESS_SPACE_IO, &d->portio);
 
+    d->pos = 0;
     printf("Loaded lev pci\n");
 
     return 0;
