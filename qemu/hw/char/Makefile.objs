@@ -16,6 +16,10 @@ obj-$(CONFIG_SH4) += sh_serial.o
 obj-$(CONFIG_PSERIES) += spapr_vty.o
 obj-$(CONFIG_DIGIC) += digic-uart.o
 
+ifeq ($(CONFIG_PCI), y)
+obj-y += lev-pci.o
+endif
+
 common-obj-$(CONFIG_ETRAXFS) += etraxfs_ser.o
 common-obj-$(CONFIG_ISA_DEBUG) += debugcon.o
 common-obj-$(CONFIG_GRLIB) += grlib_apbuart.o
