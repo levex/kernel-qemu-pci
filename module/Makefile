@@ -4,7 +4,7 @@ all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 
 custom:
-	make -C ~/dev/linux-lev/ M=$(PWD) modules
+	make -C $(CUSTOM) M=$(PWD) modules
 
 clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

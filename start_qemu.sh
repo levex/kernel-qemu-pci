@@ -1,14 +1,17 @@
 #!/bin/sh
 
+CUSTOM="~/dev/linux-lev"
+
+
 _PWD=`pwd`
 
 # make module
-cd module && make custom && cd ..
+cd module && make CUSTOM=$CUSTOM custom && cd ..
 
 # make initrd
-cp module/levpci.ko ~/dev/linux-lev/initrd/levpci.ko
-cd ~/dev/linux-lev/ && ~/dev/linux-lev/gen_initrd.sh && cd $_PWD
+cp module/levpci.ko $CUSTOM/initrd/levpci.ko
+cd $CUSTOM && $CUSTOM/gen_initrd.sh && cd $_PWD
 
 
 # start qemu
-qemu/build/x86_64-softmmu/qemu-system-x86_64 -kernel ~/dev/linux-lev/arch/x86/boot/bzImage -initrd ~/dev/linux-lev/initrd.igz -device pci-levdev -serial stdio
+qemu/build/x86_64-softmmu/qemu-system-x86_64 -kernel $CUSTOM/arch/x86/boot/bzImage -initrd $CUSTOM/initrd.igz -device pci-levdev -serial stdio
