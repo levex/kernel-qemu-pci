@@ -22,11 +22,11 @@
 #include "qemu/osdep.h"
 
 typedef struct PCILevDevState {
-    /*< private >*/
     PCIDevice parent_obj;
-    /*< public >*/
 
     int pos;
+    char *buf;
+    int buflen;
 
     MemoryRegion mmio;
     MemoryRegion portio;
@@ -41,17 +41,11 @@ static uint64_t
 pci_levdev_read(void *opaque, hwaddr addr, unsigned size)
 {
     PCILevDevState *d = opaque;
-    static const char *str = "Hello, world!\n";
-    static int len = 0;
     
-    len = strlen(str);
-
-    //printf("addr = 0x%x\n", (unsigned int)addr);
-
     if (addr == 0)
-        return str[d->pos ++];
+        return d->buf[d->pos ++];
     else
-        return len;
+        return d->buflen;
 }
 
 static void
@@ -59,7 +53,28 @@ pci_levdev_mmio_write(void *opaque, hwaddr addr, uint64_t val,
                        unsigned size)
 {
 
-   //PCILevDevState *d = opaque;
+   PCILevDevState *d = opaque;
+
+   switch(addr) {
+       case 0:
+           /* write byte */
+	   if (!d->buf)
+               break;
+	   if (d->pos >= d->buflen)
+	       break;
+	   d->buf[d->pos ++] = (uint8_t)val;
+	   break;
+       case 1:
+           /* reset pos */
+           d->pos = 0;
+	   break;
+       case 2:
+           /* set buffer length */
+	   d->buflen = val + 1;
+	   g_free(d->buf);
+	   d->buf = g_malloc(d->buflen);
+	   break;
+   }
 
    printf("lev: got write of size %d val: 0x%x\n", size, (unsigned int)val);
 
@@ -90,6 +105,9 @@ static int pci_levdev_init(PCIDevice *pci_dev)
     pci_register_bar(pci_dev, 0, PCI_BASE_ADDRESS_SPACE_MEMORY, &d->mmio);
 
     d->pos = 0;
+    d->buf = g_malloc(14);
+    memcpy(d->buf, "Hello, world!\n", 14);
+    d->buflen = 14;
     printf("Loaded lev pci\n");
 
     return 0;

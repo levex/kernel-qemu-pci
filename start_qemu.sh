@@ -7,7 +7,7 @@
 # which will be passed onto qemu
 
 # kernel location
-CUSTOM="$HOME/dev/linux-lev"
+CUSTOM="$HOME/Development/kernel/linux-lev"
 
 
 _PWD=`pwd`
