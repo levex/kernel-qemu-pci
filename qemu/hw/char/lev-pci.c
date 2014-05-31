@@ -76,8 +76,6 @@ pci_levdev_mmio_write(void *opaque, hwaddr addr, uint64_t val,
 	   break;
    }
 
-   printf("lev: got write of size %d val: 0x%x\n", size, (unsigned int)val);
-
    return;
 }
 
