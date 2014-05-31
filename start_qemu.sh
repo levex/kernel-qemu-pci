@@ -1,6 +1,13 @@
 #!/bin/sh
 
-CUSTOM="~/dev/linux-lev"
+# this script is *very* specific to my setup
+# which means that in every kernel source tree
+# I have an initrd folder and a 'gen_initrd.sh'
+# script which generates an initrd.igz file
+# which will be passed onto qemu
+
+# kernel location
+CUSTOM="$HOME/dev/linux-lev"
 
 
 _PWD=`pwd`
