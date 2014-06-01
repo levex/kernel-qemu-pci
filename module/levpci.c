@@ -112,7 +112,7 @@ static int levpci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 
 	mmio = pci_iomap(pdev, 0, 0);
 	if (!mmio) {
-		printk(KERN_EMERG "lev: failed to iomap!\n");
+		pr_emerg("failed to iomap!\n");
 		return -ENODEV;
 	}
 
